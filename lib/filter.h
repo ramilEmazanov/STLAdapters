@@ -5,10 +5,7 @@ class Filter {
  public:
   Filter(const Predicate& predicate) : predicate_(predicate) {}
 
-  Filter(const Predicate& predicate) : predicate_(predicate) {}
-
-
-  const Predicate& GetPredicate() const { return predicate_; }
+  Predicate GetPredicate() const { return predicate_; }
 
  private:
   Predicate predicate_;
@@ -18,14 +15,16 @@ class Filter {
 template <typename Range, typename Predicate>
 class FilterIterator {
  public:
-  // Is using decltype and declval appropriate?
-  // using base_iterator = typename
-  using base_iterator = decltype(std::declval<Range>().begin());
-  using value_type = std::iterator_traits<base_iterator>::value_type;
-  using reference = std::iterator_traits<base_iterator>::reference;
-  using difference_type = std::ptrdiff_t;
-  using pointer = value_type*;
-  using iterator_category = std::input_iterator_tag;
+ using base_iterator = decltype(std::declval<Range>().begin());
+ using value_type =
+ std::remove_reference_t<decltype(*std::declval<Range>().begin())>;
+ using reference = value_type&;
+ using difference_type = std::ptrdiff_t;
+ using pointer = value_type*;
+ using iterator_category = std::input_iterator_tag;
+ 
+ // using reference = std::iterator_traits<base_iterator>::reference;
+ // using value_type = std::iterator_traits<base_iterator>::value_type;
 
   FilterIterator(const Predicate& predicate, const base_iterator& begin,
                  const base_iterator& end)
@@ -37,15 +36,13 @@ class FilterIterator {
     return current_ == other.current_;
   }
 
-  bool operator!=(const FilterIterator& other) const { return !(*this == other); }
-
-  reference operator*() const {
-    return *current_;
+  bool operator!=(const FilterIterator& other) const {
+    return !(*this == other);
   }
 
-  pointer operator->() const {
-    return &(*current_);
-  }
+  decltype(auto) operator*() { return *current_; }
+
+  pointer operator->() { return &(*current_); }
 
   FilterIterator& operator++() {
     ++current_;
@@ -86,6 +83,9 @@ class FilterRange {
   Iterator end() const {
     return Iterator(predicate_, source_.end(), source_.end());
   }
+
+  const Predicate& GetPredicate() const { return predicate_; }
+
 
  private:
   const Range& source_;

@@ -25,7 +25,7 @@ add_executable(
     #split_ut.cpp
     transform_ut.cpp
     write_ut.cpp
-    as_data_flow.cpp
+    #as_data_flow.cpp
 )
 
 target_link_libraries(

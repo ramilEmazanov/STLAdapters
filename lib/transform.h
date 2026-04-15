@@ -4,7 +4,7 @@ class Transform {
  public:
   Transform(const Predicate& predicate) : predicate_(predicate) {}
 
-  const Predicate& GetPredicate() const { return predicate_; }
+  Predicate GetPredicate() const { return predicate_; }
 
  private:
   Predicate predicate_;
@@ -15,15 +15,15 @@ template <typename Range, typename Predicate>
 class TransformIterator {
  public:
   using base_iterator = decltype(std::declval<Range>().begin());
-  using reference = std::iterator_traits<base_iterator>::reference;
-  using value_type = std::iterator_traits<base_iterator>::value_type;
+  using original_type = decltype(*std::declval<Range>().begin());
+  using value_type = std::invoke_result_t<Predicate, original_type>;
+  using reference = value_type&;
   using difference_type = std::ptrdiff_t;
   using pointer = value_type*;
   using iterator_category = std::input_iterator_tag;
-  // using
 
   TransformIterator(const Predicate& predicate, const base_iterator& begin,
-                 const base_iterator& end)
+                    const base_iterator& end)
       : predicate_(predicate), current_(begin), end_(end) {}
 
   bool operator==(const TransformIterator& other) const {
@@ -33,13 +33,10 @@ class TransformIterator {
   bool operator!=(const TransformIterator& other) const {
     return !(*this == other);
   }
+  
+  decltype(auto) operator*() { return predicate_(*current_); }
 
-  reference operator*() { 
-    *current_ = predicate_(*current_);
-    return *current_; 
-  }
-
-  pointer operator->() const { return &(*current_); }
+  pointer operator->() { return &(*current_); }
 
   TransformIterator& operator++() {
     ++current_;
@@ -66,11 +63,15 @@ class TransformRange {
 
   using Iterator = TransformIterator<Range, Predicate>;
 
-  auto begin() const {
+  Iterator begin() const {
     return Iterator(predicate_, source_.begin(), source_.end());
   }
 
-  auto end() const { return Iterator(predicate_, source_.end(), source_.end()); }
+  Iterator end() const {
+    return Iterator(predicate_, source_.end(), source_.end());
+  }
+
+  Predicate GetPredicate() const { return predicate_; }
 
  private:
   const Range& source_;

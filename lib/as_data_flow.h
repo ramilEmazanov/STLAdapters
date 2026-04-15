@@ -21,9 +21,9 @@
 //   const Container& container_;
 // };
 
-
 template <typename Container>
 struct AsDataFlow {
+  using value_type = typename Container::value_type;
   using iterator = typename Container::iterator;
 
   AsDataFlow(Container& container) : container_(container) {}

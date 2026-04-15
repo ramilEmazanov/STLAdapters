@@ -13,32 +13,10 @@
 #include "write.h"
 
 int main(int argc, char** argv) {
-  std::vector<int> input = {1, 2, 3, 4, 5};
-  auto result = AsDataFlow(input);
-  for (auto x : result) {
-    x += 2;
-    std::cout << x << '\n';
-  }
-  for(auto& x : result) {
-    std::cout << x << '\n';
-  }
-  // std::vector<int> input = {1, 2, 3, 4, 5};
-  // std::stringstream file_emulator;
-  // auto result = AsDataFlow(input) | Write(file_emulator, '|');
-
-  // while (file_emulator) {
-  //   std::string s;
-  //   file_emulator >> s;
-  //   std::cout << s;
-  // }
-
-  // for (auto x : result) {
-  //   std::cout << x << ' ';
-  // }
   return 0;
 }
 
-// if (agrc != 2) return 1;
+// if (argc != 2) return 1;
 
 // bool recursive = false;
 // Dir(argv[1], recursive) |

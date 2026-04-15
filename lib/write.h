@@ -4,20 +4,33 @@
 #include <string>
 
 // What's with modifiers?
-class Write {
+class WriteRange {
+ public:
+  WriteRange(std::ostream& out) : out_(out) {}
+
  private:
+  std::ostream& out_;
+};
+
+class Write {
  public:
   Write(std::ostream& out, char delimiter) : delimiter_(delimiter), out_(out) {}
 
+  template <typename Range>
+  auto operator()(const Range& range) const {
+    for (const auto& item : range) {
+      out_ << item << delimiter_;
+    }
+    return WriteRange(out_);
+  }
+
+ private:
   char delimiter_;
   std::ostream& out_;
 };
 
 // What to return?
 template <typename Range>
-Range operator|(const Range& range, const Write& write) {
-  for (const auto& item : range) {
-    write.out_ << item << write.delimiter_;
-  }
-  return range;
+auto operator|(const Range& range, const Write& write) {
+  return write(range);
 }
