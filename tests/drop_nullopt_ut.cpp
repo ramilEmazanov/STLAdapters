@@ -21,6 +21,25 @@ TEST(DropNulloptTest, DropNulloptSingleNull) {
 TEST(DropNulloptTest, DropNulloptWithFilter) {
   std::vector<std::optional<int>> input = {1, 2, std::nullopt, 3,
                                            4, 5, std::nullopt};
-  auto result = AsDataFlow(input) | DropNullopt() | Filter([](int x) { return x % 2 == 0; }) | AsVector();
+  auto result = AsDataFlow(input) | DropNullopt() |
+                Filter([](int x) { return x % 2 == 0; }) | AsVector();
   ASSERT_THAT(result, testing::ElementsAre(2, 4));
+}
+
+TEST(DropNulloptTest, DropNulloptWithFilterAndTransform) {
+  std::vector<std::optional<int>> input = {1, 2, std::nullopt, 3,
+                                           4, 5, std::nullopt};
+  auto result = AsDataFlow(input) | DropNullopt() |
+                Filter([](int x) { return x % 2 == 0; }) |
+                Transform([](int x) { return x * x; }) | AsVector();
+  ASSERT_THAT(result, testing::ElementsAre(4, 16));
+}
+
+TEST(DropNulloptTest, DropNulloptWithTransformAndFilter) {
+  std::vector<std::optional<int>> input = {1, 2, std::nullopt, 3,
+                                           4, 5, std::nullopt};
+  auto result = AsDataFlow(input) | DropNullopt() |
+                Transform([](int x) { return x * x; }) |
+                Filter([](int x) { return x % 2 == 0; }) | AsVector();
+  ASSERT_THAT(result, testing::ElementsAre(4, 16));
 }

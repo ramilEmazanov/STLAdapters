@@ -15,16 +15,13 @@ class Filter {
 template <typename Range, typename Predicate>
 class FilterIterator {
  public:
- using base_iterator = decltype(std::declval<Range>().begin());
- using value_type =
- std::remove_reference_t<decltype(*std::declval<Range>().begin())>;
- using reference = value_type&;
-//  using difference_type = std::ptrdiff_t;
- using pointer = value_type*;
- using iterator_category = std::input_iterator_tag;
- 
- // using reference = std::iterator_traits<base_iterator>::reference;
- // using value_type = std::iterator_traits<base_iterator>::value_type;
+  using base_iterator = decltype(std::declval<Range>().begin());
+  using value_type =
+      std::remove_reference_t<decltype(*std::declval<Range>().begin())>;
+  using reference = value_type&;
+  using difference_type = std::ptrdiff_t;
+  using pointer = value_type*;
+  using iterator_category = std::input_iterator_tag;
 
   FilterIterator(const Predicate& predicate, const base_iterator& begin,
                  const base_iterator& end)
@@ -85,7 +82,6 @@ class FilterRange {
   }
 
   const Predicate& GetPredicate() const { return predicate_; }
-
 
  private:
   const Range& source_;

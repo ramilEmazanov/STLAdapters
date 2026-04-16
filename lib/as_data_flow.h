@@ -2,8 +2,6 @@
 
 #include <utility>
 
-
-
 // const_iterator возможно не даст пройтись используя transform
 // но без const_iterator нельзя пройтись по non-const container
 
@@ -22,7 +20,8 @@
 // };
 
 template <typename Container>
-struct AsDataFlow {
+class AsDataFlow {
+ public:
   using value_type = typename Container::value_type;
   using iterator = typename Container::iterator;
 
