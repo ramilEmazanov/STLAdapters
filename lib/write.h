@@ -3,6 +3,9 @@
 #include <ostream>
 #include <string>
 
+// 1. Split works with O(n)
+// 2. 
+
 // What's with modifiers?
 class WriteRange {
  public:
