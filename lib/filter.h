@@ -19,7 +19,7 @@ class FilterIterator {
  using value_type =
  std::remove_reference_t<decltype(*std::declval<Range>().begin())>;
  using reference = value_type&;
- using difference_type = std::ptrdiff_t;
+//  using difference_type = std::ptrdiff_t;
  using pointer = value_type*;
  using iterator_category = std::input_iterator_tag;
  
