@@ -3,25 +3,28 @@
 template <typename Predicate>
 class Filter {
  public:
+  using decayed_predicate = std::decay_t<Predicate>;
+
   Filter(const Predicate& predicate) : predicate_(predicate) {}
 
-  Predicate GetPredicate() const { return predicate_; }
+  decayed_predicate GetPredicate() const { return predicate_; }
 
  private:
-  Predicate predicate_;
+  decayed_predicate predicate_;
 };
 
 // What about const methods, const_iterator?
 template <typename Range, typename Predicate>
 class FilterIterator {
  public:
-  using base_iterator = decltype(std::declval<Range>().begin());
+  using base_iterator = decltype(std::declval<const Range&>().begin());
   using value_type =
       std::remove_reference_t<decltype(*std::declval<Range>().begin())>;
   using reference = value_type&;
   using difference_type = std::ptrdiff_t;
   using pointer = value_type*;
   using iterator_category = std::input_iterator_tag;
+  using decayed_predicate = std::decay_t<Predicate>;
 
   FilterIterator(const Predicate& predicate, const base_iterator& begin,
                  const base_iterator& end)
@@ -60,7 +63,7 @@ class FilterIterator {
     }
   }
 
-  Predicate predicate_;
+  decayed_predicate predicate_;
   base_iterator current_;
   base_iterator end_;
 };
@@ -68,7 +71,8 @@ class FilterIterator {
 template <typename Range, typename Predicate>
 class FilterRange {
  public:
-  using Iterator = FilterIterator<Range, Predicate>;
+//  using decayed_predicate = std::decay_t<Predicate>;
+ using Iterator = FilterIterator<Range, Predicate>;
 
   FilterRange(const Range& range, const Predicate& predicate)
       : source_(range), predicate_(predicate) {}
@@ -81,7 +85,7 @@ class FilterRange {
     return Iterator(predicate_, source_.end(), source_.end());
   }
 
-  const Predicate& GetPredicate() const { return predicate_; }
+  Predicate GetPredicate() const { return predicate_; }
 
  private:
   const Range& source_;
@@ -91,5 +95,7 @@ class FilterRange {
 template <typename Range, typename Predicate>
 FilterRange<Range, Predicate> operator|(const Range& range,
                                         const Filter<Predicate>& filter) {
-  return FilterRange<Range, Predicate>(range, filter.GetPredicate());
+  using decayed_predicate = std::decay_t<Predicate>;
+
+  return FilterRange<Range, decayed_predicate>(range, filter.GetPredicate());
 }

@@ -2,25 +2,33 @@
 template <typename Predicate>
 class Transform {
  public:
-  Transform(const Predicate& predicate) : predicate_(predicate) {}
+  using decayed_predicate = std::decay_t<Predicate>;
 
-  Predicate GetPredicate() const { return predicate_; }
+  Transform(const Predicate& predicate) : predicate_(predicate) {
+    // f(predicate_);
+  }
+
+  decayed_predicate GetPredicate() const { return predicate_; }
+
+  // template<typename T>
+  // void f(T) = delete;
 
  private:
-  Predicate predicate_;
+  decayed_predicate predicate_;
 };
 
 // Begin, end + for range based loop
 template <typename Range, typename Predicate>
 class TransformIterator {
  public:
-  using base_iterator = decltype(std::declval<Range>().begin());
+  using base_iterator = decltype(std::declval<const Range>().begin());
   using original_type = decltype(*std::declval<Range>().begin());
   using value_type = std::invoke_result_t<Predicate, original_type>;
   using reference = value_type&;
   using difference_type = std::ptrdiff_t;
   using pointer = value_type*;
   using iterator_category = std::input_iterator_tag;
+  using decayed_predicate = std::decay_t<Predicate>;
 
   TransformIterator(const Predicate& predicate, const base_iterator& begin,
                     const base_iterator& end)
@@ -33,7 +41,7 @@ class TransformIterator {
   bool operator!=(const TransformIterator& other) const {
     return !(*this == other);
   }
-  
+
   decltype(auto) operator*() { return predicate_(*current_); }
 
   pointer operator->() { return &(*current_); }
@@ -50,7 +58,7 @@ class TransformIterator {
   }
 
  private:
-  Predicate predicate_;
+  decayed_predicate predicate_;
   base_iterator current_;
   base_iterator end_;
 };
@@ -58,6 +66,8 @@ class TransformIterator {
 template <typename Range, typename Predicate>
 class TransformRange {
  public:
+  using decayed_predicate = std::decay_t<Predicate>;
+
   TransformRange(const Range& source, const Predicate& predicate)
       : source_(source), predicate_(predicate) {}
 
@@ -71,15 +81,16 @@ class TransformRange {
     return Iterator(predicate_, source_.end(), source_.end());
   }
 
-  Predicate GetPredicate() const { return predicate_; }
+  decayed_predicate GetPredicate() const { return predicate_; }
 
  private:
   const Range& source_;
-  Predicate predicate_;
+  decayed_predicate predicate_;
 };
 
 template <typename Range, typename Predicate>
-TransformRange<Range, Predicate> operator|(const Range& range,
-                                           Transform<Predicate> transform) {
-  return TransformRange<Range, Predicate>(range, transform.GetPredicate());
+auto operator|(const Range& range, Transform<Predicate> transform) {
+  using decayed_predicate = std::decay_t<Predicate>;
+  return TransformRange<Range, decayed_predicate>(range,
+                                                  transform.GetPredicate());
 }

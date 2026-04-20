@@ -3,9 +3,6 @@
 #include <ostream>
 #include <string>
 
-// 1. Split works with O(n)
-// 2. 
-
 // What's with modifiers?
 class WriteRange {
  public:
@@ -32,7 +29,6 @@ class Write {
   std::ostream& out_;
 };
 
-// What to return?
 template <typename Range>
 auto operator|(const Range& range, const Write& write) {
   return write(range);
