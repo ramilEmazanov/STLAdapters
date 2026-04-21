@@ -71,8 +71,7 @@ class FilterIterator {
 template <typename Range, typename Predicate>
 class FilterRange {
  public:
-//  using decayed_predicate = std::decay_t<Predicate>;
- using Iterator = FilterIterator<Range, Predicate>;
+  using Iterator = FilterIterator<Range, Predicate>;
 
   FilterRange(const Range& range, const Predicate& predicate)
       : source_(range), predicate_(predicate) {}

@@ -1,12 +1,6 @@
+#include <queue>
 #include <unordered_map>
-
-/*
-1. Для каждого элемента идем и достаем ключ по функции (проходимся по стринге,
-стринга и есть ключ)
-2. Ищем в мапе этот элемент. Если такого элемента в мапе нет, создаем по
-start_value
-3. Используем aggregator
-*/
+#include <vector>
 
 template <typename Value, typename Aggregator, typename KeyMaker>
 class AggregateByKey {
@@ -17,10 +11,6 @@ class AggregateByKey {
         aggregator_(aggregator),
         key_maker_(key_maker) {}
 
-  using decayed_aggregator = std::decay_t<Aggregator>;
-  using decayed_keymaker = std::decay_t<KeyMaker>;
-  using decayed_value = std::decay_t<Value>;
-
   template <typename Range>
   auto operator()(const Range& range) const {
     using element_type = std::decay_t<decltype(*std::declval<Range>().begin())>;
@@ -28,9 +18,12 @@ class AggregateByKey {
     using value_type = std::decay_t<Value>;
 
     std::unordered_map<key_type, value_type> storage;
+    std::queue<key_type> order;
+    std::vector<std::pair<key_type, value_type>> ans;
 
     for (const auto& item : range) {
       auto key = key_maker_(item);
+      order.push(key);
 
       if (storage.contains(key)) {
         aggregator_(item, storage[key]);
@@ -39,12 +32,19 @@ class AggregateByKey {
         aggregator_(item, storage[key]);
       }
     }
-    return storage;
-  }
 
-  // auto aggregate() {
-  //   return std::unordered_map<int, int>;
-  // }
+    while (!order.empty()) {
+      auto key = order.front();
+      order.pop();
+
+      if (storage.contains(key)) {
+        ans.push_back({key, storage[key]});
+        storage.erase(key);
+      }
+    }
+
+    return ans;
+  }
 
  private:
   Value starting_value_;
@@ -57,5 +57,4 @@ template <typename Range, typename Value, typename Aggregator,
 auto operator|(const Range& range,
                const AggregateByKey<Value, Aggregator, KeyMaker>& agg) {
   return agg(range);
-  // return agg.aggregate();
 }

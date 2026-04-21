@@ -69,3 +69,57 @@ TEST(SimpleTest, JoinComparators) {
         )
     );
 }
+
+TEST(JoinTest, BothEmpty) {
+  std::vector<KV<int, std::string>> left = {};
+  std::vector<KV<int, std::string>> right = {};
+
+  auto result = AsDataFlow(left) | Join(AsDataFlow(right)) | AsVector();
+
+  ASSERT_TRUE(result.empty());
+}
+
+TEST(JoinTest, LeftEmpty) {
+  std::vector<KV<int, std::string>> left = {};
+  std::vector<KV<int, std::string>> right = {{0, "a"}, {1, "b"}};
+
+  auto result = AsDataFlow(left) | Join(AsDataFlow(right)) | AsVector();
+
+  ASSERT_TRUE(result.empty());
+}
+
+TEST(JoinTest, RightEmpty) {
+  std::vector<KV<int, std::string>> left = {{0, "a"}, {1, "b"}};
+  std::vector<KV<int, std::string>> right = {};
+
+  auto result = AsDataFlow(left) | Join(AsDataFlow(right)) | AsVector();
+
+  ASSERT_THAT(result,
+              testing::ElementsAre(
+                  JoinResult<std::string, std::string>{"a", std::nullopt},
+                  JoinResult<std::string, std::string>{"b", std::nullopt}));
+}
+
+TEST(JoinTest, AllMatch) {
+  std::vector<KV<int, std::string>> left = {{0, "a"}, {1, "b"}, {2, "c"}};
+  std::vector<KV<int, std::string>> right = {{0, "x"}, {1, "y"}, {2, "z"}};
+
+  auto result = AsDataFlow(left) | Join(AsDataFlow(right)) | AsVector();
+
+  ASSERT_THAT(result, testing::ElementsAre(
+                          JoinResult<std::string, std::string>{"a", "x"},
+                          JoinResult<std::string, std::string>{"b", "y"},
+                          JoinResult<std::string, std::string>{"c", "z"}));
+}
+
+TEST(JoinTest, DuplicateKeysInLeft) {
+  std::vector<KV<int, std::string>> left = {{1, "a"}, {1, "b"}, {1, "c"}};
+  std::vector<KV<int, std::string>> right = {{1, "x"}};
+
+  auto result = AsDataFlow(left) | Join(AsDataFlow(right)) | AsVector();
+
+  ASSERT_THAT(result, testing::ElementsAre(
+                          JoinResult<std::string, std::string>{"a", "x"},
+                          JoinResult<std::string, std::string>{"b", "x"},
+                          JoinResult<std::string, std::string>{"c", "x"}));
+}

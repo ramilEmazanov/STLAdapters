@@ -107,16 +107,6 @@ TEST(SplitTest, SplitThenFilterTransform) {
   ASSERT_THAT(result, testing::ElementsAre(4, 16));
 }
 
-// TEST(SplitTest, RealFile) {
-//   std::ofstream out("test_split.txt");
-//   out << "hello\nworld\nfoo";
-//   out.close();
-
-//   std::ifstream file("test_split.txt");
-//   auto result = AsDataFlow(file) | Split("\n") | AsVector();
-//   ASSERT_THAT(result, testing::ElementsAre("hello", "world", "foo"));
-// }
-
 TEST(SplitTest, SplitStrings) {
   std::vector<std::stringstream> files(1);
   files[0] << "good-department|bad department|another-good-department";
@@ -126,22 +116,3 @@ TEST(SplitTest, SplitStrings) {
   ASSERT_THAT(result, testing::ElementsAre("good-department", "bad department",
                                            "another-good-department"));
 }
-
-// // my
-// TEST(ReadTest, BySpace2) {
-//     std::vector<std::stringstream> files(2);
-//     files[0] << "123456 2 3 4 5";
-//     files[1] << "6 7 8 9 10";
-//     auto result = AsDataFlow(files) | Split(" ") | AsVector();
-//     ASSERT_THAT(result, testing::ElementsAre("123456", "2", "3", "4", "5",
-//     "6", "7", "8", "9", "10"));
-// }
-
-// TEST(ReadTest, Basic) {
-//   std::vector<std::stringstream> files(2);
-//   files[0] << "1\n2\n3\n4\n5";
-//   files[1] << "6\n7\n8\n9\n10";
-//   auto result = AsDataFlow(files);
-//   ASSERT_THAT(result, testing::ElementsAre("1", "2", "3", "4", "5", "6", "7",
-//                                            "8", "9", "10"));
-// }

@@ -11,7 +11,6 @@ TEST(DropNulloptTest, DropNullopt) {
   ASSERT_THAT(result, testing::ElementsAre(1, 3, 5));
 }
 
-// My
 TEST(DropNulloptTest, DropNulloptSingleNull) {
   std::vector<std::optional<int>> input = {std::nullopt};
   auto result = AsDataFlow(input) | DropNullopt() | AsVector();
