@@ -18,21 +18,21 @@
 int main(int argc, char** argv) {
   if (argc != 2) return 1;
 
-  bool recursive = true;
-  Dir(argv[1], recursive) |
-      Transform([](const std::filesystem::path& p) { return p.string(); }) |
-      Out(std::cout);
+  // bool recursive = true;
+  // Dir(argv[1], recursive) |
+  //     Transform([](const std::filesystem::path& p) { return p.string(); }) |
+  //     Out(std::cout);
 
   // Dir(argv[1], recursive) | Filter([](const std::filesystem::path& p) {
   //   return p.extension() == ".log";
-  // }) | Transform([](const std::filesystem::path& p) { return p.string(); }) |
+  // }) | Transform([](std::filesystem::path& p) { return p.string(); }) |
   //     Out(std::cout);
 
-  // bool recursive = false;
-  // Dir(argv[1], recursive) |
-  //     Filter([](std::filesystem::path& p) { return p.extension() == ".log";
-  //     }) | OpenFiles() | Split("\n") | Filter([](std::string& line) { return
-  //     !line.empty(); }) | Out(std::cout);
+  bool recursive = false;
+  Dir(argv[1], recursive) |
+      Filter([](const std::filesystem::path& p) { return p.extension() == ".log";
+      }) | OpenFiles() | Split("\n") | Filter([](const std::string& line) { return
+      !line.empty(); }) | Out(std::cout);
 
   return 0;
 }
