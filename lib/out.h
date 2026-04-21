@@ -7,7 +7,7 @@ class Out {
   Out(std::ostream& out) : out_(out) {}
 
   template <typename Range>
-  auto operator()(const Range& range) {
+  auto operator()(const Range& range) const {
     for (const auto& item : range) {
       out_ << item << '\n';
     }
