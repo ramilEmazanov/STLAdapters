@@ -1,3 +1,6 @@
+#include <fstream>
+#include <memory>
+
 class OpenFiles {};
 
 template <typename Iterator>
