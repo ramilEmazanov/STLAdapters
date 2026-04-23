@@ -16,15 +16,15 @@ enable_testing()
 
 add_executable(
     processing-lib-tests
-    #drop_nullopt_ut.cpp
-    #filter_ut.cpp
-    #flow_convertions_ut.cpp
-    #split_ut.cpp
-    #transform_ut.cpp
-    #write_ut.cpp
+    drop_nullopt_ut.cpp
+    filter_ut.cpp
+    flow_convertions_ut.cpp
+    split_ut.cpp
+    transform_ut.cpp
+    write_ut.cpp
     split_expected_ut.cpp
-    #aggregate_by_key_ut.cpp
-    #join_ut.cpp
+    aggregate_by_key_ut.cpp
+    join_ut.cpp
 )
 
 target_link_libraries(

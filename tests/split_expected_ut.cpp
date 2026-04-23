@@ -1,28 +1,27 @@
-#include <processing.h>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <processing.h>
 
+#include <charconv>
 #include <expected>
 #include <sstream>
 #include <string>
-#include <charconv>
 #include <vector>
 
 struct Department {
-    std::string name;
+  std::string name;
 
-    bool operator==(const Department& other) const = default;
+  bool operator==(const Department& other) const = default;
 };
 
 std::expected<Department, std::string> ParseDepartment(const std::string& str) {
-    if (str.empty()) {
-        return std::unexpected("Department name is empty");
-    }
-    if (str.contains(' ')) {
-        return std::unexpected("Department name contains space");
-    }
-    return Department{str};
+  if (str.empty()) {
+    return std::unexpected("Department name is empty");
+  }
+  if (str.contains(' ')) {
+    return std::unexpected("Department name contains space");
+  }
+  return Department{str};
 }
 
 std::expected<int, std::string> ParseInt(const std::string& str) {
@@ -41,18 +40,23 @@ std::expected<int, std::string> ParsePositive(const std::string& str) {
 }
 
 TEST(SplitExpectedTest, SplitExpected) {
-    std::vector<std::stringstream> files(1);
-    files[0] << "good-department|bad department||another-good-department";
+  std::vector<std::stringstream> files(1);
+  files[0] << "good-department|bad department||another-good-department";
 
-    auto [unexpected_flow, good_flow] = AsDataFlow(files) | Split("|") | Transform(ParseDepartment) | SplitExpected();
+  auto [unexpected_flow, good_flow] = AsDataFlow(files) | Split("|") |
+                                      Transform(ParseDepartment) |
+                                      SplitExpected();
 
-    std::stringstream unexpected_file;
-    unexpected_flow | Write(unexpected_file, '.');
+  std::stringstream unexpected_file;
+  unexpected_flow | Write(unexpected_file, '.');
 
-    auto expected_result = good_flow | AsVector();
+  auto expected_result = good_flow | AsVector();
 
-    ASSERT_EQ(unexpected_file.str(), "Department name contains space.Department name is empty.");
-    ASSERT_THAT(expected_result, testing::ElementsAre(Department{"good-department"}, Department{"another-good-department"}));
+  ASSERT_EQ(unexpected_file.str(),
+            "Department name contains space.Department name is empty.");
+  ASSERT_THAT(expected_result,
+              testing::ElementsAre(Department{"good-department"},
+                                   Department{"another-good-department"}));
 }
 
 TEST(SplitExpectedTest, AllValid) {
@@ -157,4 +161,30 @@ TEST(SplitExpectedTest, FromStreamWithSplit) {
   ASSERT_THAT(good | AsVector(),
               testing::ElementsAre(Department{"eng"}, Department{"hr"},
                                    Department{"finance"}));
+}
+
+std::expected<std::string, std::string> ParseName(const std::string& name) {
+  if (std::isupper(name[0]) &&
+      std::all_of(name.begin(), name.end(),
+                  [](char c) { return std::isalpha(c); })) {
+    return name;
+  }
+  return std::unexpected(name);
+}
+
+TEST(SplitExpectedTest, WorkWithSplitFlows) {
+  std::vector<std::stringstream> files(3);
+  files[0] << "ashdj Roma sahjsa Kekich";
+  files[1] << "Lolkek 123 pipaio";
+  files[2] << "illusion of safety";
+  auto [wrong, names] =
+      AsDataFlow(files) | Split(" ") | Transform(ParseName) | SplitExpected();
+
+  ASSERT_THAT(names | AsVector(),
+              testing::ElementsAre("Roma", "Kekich", "Lolkek"));
+
+  auto short_words = wrong |
+               Filter([](const std::string& s) { return s.size() <= 3; }) |
+               AsVector();
+  ASSERT_THAT(short_words, testing::ElementsAre("123", "of"));
 }

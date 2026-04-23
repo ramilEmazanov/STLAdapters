@@ -41,3 +41,5 @@
 *.dwo
 /build
 /bin/test_data
+/est
+/programs

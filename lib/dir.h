@@ -6,7 +6,7 @@ class DirIterator {
               bool is_rec)
       : is_recursive_(is_rec), current_(iter) {}
 
-  auto operator*() { return current_->path(); }
+  std::filesystem::path operator*() { return current_->path(); }
 
   DirIterator& operator++() {
     if (!is_recursive_) {

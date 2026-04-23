@@ -6,7 +6,8 @@ template <typename Range>
 class DropNulloptIterator {
  public:
   using base_iterator = decltype(std::declval<Range>().begin());
-  using opt_type = std::remove_reference_t<decltype(*std::declval<Range>().begin())>;
+  using opt_type =
+      std::remove_reference_t<decltype(*std::declval<Range>().begin())>;
   using value_type = typename opt_type::value_type;
   using reference = value_type&;
   using pointer = value_type*;
@@ -28,7 +29,8 @@ class DropNulloptIterator {
     return copy;
   }
 
-  reference operator*() { return **current_; }
+  // decltype(auto) operator*() { return **current_; }
+  value_type operator*() { return **current_; }
 
   pointer operator->() { return &(**current_); }
 
@@ -60,7 +62,9 @@ class DropNulloptRange {
     return DropNulloptIterator<Range>(source_.begin(), source_.end());
   }
 
-  auto end() const { return DropNulloptIterator<Range>(source_.end(), source_.end()); }
+  auto end() const {
+    return DropNulloptIterator<Range>(source_.end(), source_.end());
+  }
 
  private:
   const Range& source_;

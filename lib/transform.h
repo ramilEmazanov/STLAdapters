@@ -4,14 +4,9 @@ class Transform {
  public:
   using decayed_predicate = std::decay_t<Predicate>;
 
-  Transform(const Predicate& predicate) : predicate_(predicate) {
-    // f(predicate_);
-  }
+  Transform(const Predicate& predicate) : predicate_(predicate) {}
 
   decayed_predicate GetPredicate() const { return predicate_; }
-
-  // template<typename T>
-  // void f(T) = delete;
 
  private:
   decayed_predicate predicate_;
@@ -42,12 +37,19 @@ class TransformIterator {
     return !(*this == other);
   }
 
-  decltype(auto) operator*() { return predicate_(*current_); }
+  value_type operator*() {
+    if (!value_.has_value()) {
+      value_ = predicate_(*current_);
+    }
+    return value_.value();
+  }
+  // value_type operator*() { return predicate_(*current_); }
 
   pointer operator->() { return &(*current_); }
 
   TransformIterator& operator++() {
     ++current_;
+    value_.reset();
     return *this;
   }
 
@@ -58,6 +60,7 @@ class TransformIterator {
   }
 
  private:
+  std::optional<value_type> value_;
   decayed_predicate predicate_;
   base_iterator current_;
   base_iterator end_;

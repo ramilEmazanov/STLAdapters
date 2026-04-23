@@ -26,7 +26,6 @@ TEST(FilterTest, FilterUpperCase) {
   ASSERT_THAT(result, testing::ElementsAre("HELLO", "WORLD"));
 }
 
-// My
 TEST(FilterTest, FilterThenTransform) {
   std::vector<int> input = {1, 2, 3, 4, 5};
   auto result = AsDataFlow(input) | Filter([](int x) { return x % 2 == 0; }) |

@@ -3,12 +3,12 @@
 
 class Split {
  public:
-  Split(std::string delimiter) : delimiter_(delimiter.at(0)) {}
+  Split(std::string delimiter) : delimiter_(delimiter) {}
 
-  char GetDelimiter() const { return delimiter_; }
+  std::string GetDelimiter() const { return delimiter_; }
 
  private:
-  char delimiter_;
+  std::string delimiter_;
 };
 
 template <typename Range>
@@ -22,12 +22,12 @@ class SplitIterator {
   using iterator_category = std::input_iterator_tag;
 
   SplitIterator(const base_iterator& begin, const base_iterator& end,
-                char delimiter)
+                const std::string& delimiter)
       : current_(begin), end_(end), delimiter_(delimiter) {
     ReadToken();
   }
 
-  SplitIterator(const base_iterator& end, char delimiter, bool)
+  SplitIterator(const base_iterator& end, const std::string& delimiter, bool)
       : current_(end), end_(end), delimiter_(delimiter) {}
 
   bool operator==(const SplitIterator& other) const {
@@ -58,7 +58,7 @@ class SplitIterator {
       std::istream& in = *current_;
       char c;
       while (in.get(c)) {
-        if (c == delimiter_) {
+        if (delimiter_.contains(c)) {
           return;
         }
         token_.push_back(c);
@@ -71,7 +71,7 @@ class SplitIterator {
   }
 
   std::string token_;
-  char delimiter_;
+  std::string delimiter_;
   base_iterator current_;
   base_iterator end_;
 };
@@ -79,7 +79,7 @@ class SplitIterator {
 template <typename Range>
 class SplitRange {
  public:
-  SplitRange(const Range& range, char delimiter)
+  SplitRange(const Range& range, const std::string& delimiter)
       : source_(range), delimiter_(delimiter) {}
 
   auto begin() const {
@@ -91,7 +91,7 @@ class SplitRange {
 
  private:
   const Range& source_;
-  char delimiter_;
+  std::string delimiter_;
 };
 
 template <typename Range>
