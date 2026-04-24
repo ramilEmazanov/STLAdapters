@@ -17,7 +17,7 @@ template <typename K, typename V>
 struct IsKV<KV<K, V>> : std::true_type {};
 
 template <typename T>
-constexpr bool IsKV_v = IsKV<T>::value;
+constexpr bool KIsKv = IsKV<T>::value;
 
 template <typename T>
 struct KvKey {
@@ -111,7 +111,7 @@ class JoinIterator {
     auto key = lkey_(item);
 
     left_type base;
-    if constexpr (IsKV_v<raw_left_type>) {
+    if constexpr (KIsKv<raw_left_type>) {
       base = item.value;
     } else {
       base = item;
@@ -164,13 +164,13 @@ class JoinRange {
     for (const auto& item : rflow) {
       auto key = rkey_(item);
 
-      if constexpr (IsKV_v<raw_right_type>) {
+      if constexpr (KIsKv<raw_right_type>) {
         right_map_.emplace(key, item.value);
       } else {
         right_map_.emplace(key, item);
       }
 
-      if constexpr (IsKV_v<raw_right_type>) {
+      if constexpr (KIsKv<raw_right_type>) {
         right_map_.emplace(key, item.value);
       } else {
         right_map_.emplace(key, item);

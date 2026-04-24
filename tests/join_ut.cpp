@@ -9,6 +9,8 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <cstdint>
 
 struct Student {
   uint64_t group_id;

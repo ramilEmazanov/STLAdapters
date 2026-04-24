@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <utility>
 #include <filesystem>
+#include <cstdint>
 
 #include <dir.h>
 #include <filter.h>
