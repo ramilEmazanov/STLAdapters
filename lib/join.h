@@ -11,39 +11,39 @@ struct KV {
 };
 
 template <typename T>
-struct is_kv : std::false_type {};
+struct IsKV : std::false_type {};
 
 template <typename K, typename V>
-struct is_kv<KV<K, V>> : std::true_type {};
+struct IsKV<KV<K, V>> : std::true_type {};
 
 template <typename T>
-constexpr bool is_kv_v = is_kv<T>::value;
+constexpr bool IsKV_v = IsKV<T>::value;
 
 template <typename T>
-struct kv_key {
+struct KvKey {
   using type = T;
 };
 
 template <typename K, typename V>
-struct kv_key<KV<K, V>> {
+struct KvKey<KV<K, V>> {
   using type = K;
 };
 
 template <typename T>
-struct kv_value {
+struct KvValue {
   using type = T;
 };
 
 template <typename K, typename V>
-struct kv_value<KV<K, V>> {
+struct KvValue<KV<K, V>> {
   using type = V;
 };
 
 template <typename K>
-using kv_key_t = typename kv_key<K>::type;
+using KvKey_t = typename KvKey<K>::type;
 
 template <typename V>
-using kv_value_t = typename kv_value<V>::type;
+using KvValue_t = typename KvValue<V>::type;
 
 template <typename Base, typename Joined>
 struct JoinResult {
@@ -93,7 +93,7 @@ class JoinIterator {
  public:
   using base_iterator = decltype(std::declval<const Range>().begin());
   using raw_left_type = std::decay_t<decltype(*std::declval<base_iterator>())>;
-  using left_type = kv_value_t<raw_left_type>;
+  using left_type = KvValue_t<raw_left_type>;
   using value_type = JoinResult<left_type, RightValue>;
 
   JoinIterator(const base_iterator& begin, const base_iterator& end,
@@ -111,7 +111,7 @@ class JoinIterator {
     auto key = lkey_(item);
 
     left_type base;
-    if constexpr (is_kv_v<raw_left_type>) {
+    if constexpr (IsKV_v<raw_left_type>) {
       base = item.value;
     } else {
       base = item;
@@ -149,8 +149,8 @@ class JoinRange {
   using raw_right_type =
       std::decay_t<decltype(*std::declval<RightFlow>().begin())>;
 
-  using left_type = kv_value_t<raw_left_type>;
-  using right_type = kv_value_t<raw_right_type>;
+  using left_type = KvValue_t<raw_left_type>;
+  using right_type = KvValue_t<raw_right_type>;
 
   using right_key_type =
       std::decay_t<std::invoke_result_t<RKey, raw_right_type>>;
@@ -164,13 +164,13 @@ class JoinRange {
     for (const auto& item : rflow) {
       auto key = rkey_(item);
 
-      if constexpr (is_kv_v<raw_right_type>) {
+      if constexpr (IsKV_v<raw_right_type>) {
         right_map_.emplace(key, item.value);
       } else {
         right_map_.emplace(key, item);
       }
 
-      if constexpr (is_kv_v<raw_right_type>) {
+      if constexpr (IsKV_v<raw_right_type>) {
         right_map_.emplace(key, item.value);
       } else {
         right_map_.emplace(key, item);

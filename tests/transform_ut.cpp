@@ -5,11 +5,12 @@
 #include <transform.h>
 #include <filter.h>
 
-#include <sstream>
 #include <string>
+#include <algorithm>
 #include <vector>
+#include <cctype>
 
-auto to_upper(std::string x) {
+auto ToUpper(std::string x) {
   std::transform(x.begin(), x.end(), x.begin(), ::toupper);
   return x;
 }
@@ -46,6 +47,6 @@ TEST(TransformTest, FuncAndLambda) {
   std::vector<std::string> input = {"hello", "world", "cpp", "test"};
   auto result = AsDataFlow(input) |
                 Filter([](const std::string& x) { return x.size() > 3; }) |
-                Transform(to_upper) | AsVector();
+                Transform(ToUpper) | AsVector();
   ASSERT_THAT(result, testing::ElementsAre("HELLO", "WORLD", "TEST"));
 }

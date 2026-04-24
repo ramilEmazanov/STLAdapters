@@ -8,10 +8,13 @@
 #include <transform.h>
 #include <write.h>
 
+#include <algorithm>
+#include <cctype>
 #include <charconv>
 #include <expected>
 #include <sstream>
 #include <string>
+#include <system_error>
 #include <vector>
 
 struct Department {

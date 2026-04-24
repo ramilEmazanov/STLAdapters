@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <vector>
+#include <string>
 
 TEST(WriteTest, Write) {
   std::vector<int> input = {1, 2, 3, 4, 5};

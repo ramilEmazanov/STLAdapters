@@ -1,8 +1,18 @@
-#include <processing.h>
-
 #include <algorithm>
 #include <format>
 #include <iostream>
+#include <cctype>
+#include <cstdint>
+#include <utility>
+#include <filesystem>
+
+#include <dir.h>
+#include <filter.h>
+#include <open_files.h>
+#include <transform.h>
+#include <split.h>
+#include <aggregate_by_key.h>
+#include <out.h>
 
 /*
 Программа считает частоту слов, встречающихся во всех файлах в директории
