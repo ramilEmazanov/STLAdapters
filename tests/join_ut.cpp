@@ -5,12 +5,11 @@
 #include <as_vector.h>
 #include <aggregate_by_key.h>
 
-#include <cstdint>
 #include <optional>
 #include <string>
 #include <vector>
-#include <algorithm>
 #include <cstdint>
+#include <utility>
 
 struct Student {
   uint64_t group_id;
@@ -123,16 +122,16 @@ TEST(JoinTest, DuplicateKeysInLeft) {
 }
 
 struct Person {
-  size_t job_id;
+  int job_id;
   std::string name;
-  Person(size_t job_id, std::string name) : job_id(job_id), name(name) {}
+  Person(int job_id, std::string name) : job_id(job_id), name(name) {}
   Person() {}
 };
 
 struct Job {
-  size_t id;
+  int id;
   std::string job_name;
-  Job(size_t id, std::string job_name) : id(id), job_name(job_name) {}
+  Job(int id, std::string job_name) : id(id), job_name(job_name) {}
   Job() {}
 };
 
