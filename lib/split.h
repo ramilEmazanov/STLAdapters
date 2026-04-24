@@ -37,7 +37,8 @@ class SplitIterator {
     return !(*this == other);
   }
 
-  reference operator*() const { return token_; }
+  value_type operator*() const { return token_; }
+
   pointer operator->() const { return &token_; }
 
   SplitIterator& operator++() {

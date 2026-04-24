@@ -63,10 +63,9 @@ TEST(FilterTest, MultipleFilters) {
   ASSERT_THAT(result, testing::ElementsAre(4, 6));
 }
 
-// Possibly TODO
-// TEST(FilterTest, FilterEvenConst) {
-//   const std::vector<int> input = {1, 2, 3, 4, 5};
-//   auto result =
-//       AsDataFlow(input) | Filter([](int x) { return x % 2 == 0; }) | AsVector();
-//   ASSERT_THAT(result, testing::ElementsAre(2, 4));
-// }
+TEST(FilterTest, FilterEvenConst) {
+  const std::vector<int> input = {1, 2, 3, 4, 5};
+  auto result =
+      AsDataFlow(input) | Filter([](int x) { return x % 2 == 0; }) | AsVector();
+  ASSERT_THAT(result, testing::ElementsAre(2, 4));
+}

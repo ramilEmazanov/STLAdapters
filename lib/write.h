@@ -3,7 +3,6 @@
 #include <ostream>
 #include <string>
 
-// What's with modifiers?
 class WriteRange {
  public:
   WriteRange(std::ostream& out) : out_(out) {}

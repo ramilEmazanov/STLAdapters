@@ -13,7 +13,6 @@ class Filter {
   decayed_predicate predicate_;
 };
 
-// What about const methods, const_iterator?
 template <typename Range, typename Predicate>
 class FilterIterator {
  public:
@@ -40,7 +39,7 @@ class FilterIterator {
     return !(*this == other);
   }
 
-  decltype(auto) operator*() { return *current_; }
+  value_type operator*() { return *current_; }
 
   pointer operator->() { return &(*current_); }
 

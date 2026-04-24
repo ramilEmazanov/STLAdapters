@@ -1,4 +1,7 @@
+#pragma once
+
 #include <optional>
+#include <iostream>
 #include <unordered_map>
 
 template <typename Key, typename Value>
@@ -53,74 +56,157 @@ struct JoinResult {
 };
 
 template <typename RightFlow, typename LKey, typename RKey>
-class JoinRange {
+class JoinTemp {
  public:
-  JoinRange(const RightFlow& rflow, const LKey& lkey, const RKey& rkey)
+  JoinTemp(const RightFlow& rflow, const LKey& lkey, const RKey& rkey)
       : rflow_(rflow), lkey_(lkey), rkey_(rkey) {}
 
-  template <typename Range>
-  auto operator()(const Range& range) const {
-    using raw_left_type = std::decay_t<decltype(*std::begin(range))>;
-    using raw_right_type = std::decay_t<decltype(*std::begin(rflow_))>;
+  using lkey_decayed = std::decay_t<LKey>;
+  using rkey_decayed = std::decay_t<RKey>;
 
-    using left_type = kv_value_t<raw_left_type>;
-    using right_type = kv_value_t<raw_right_type>;
+  lkey_decayed GetLKey() const { return lkey_; }
 
-    using right_key_type = decltype(rkey_(std::declval<raw_right_type>()));
+  rkey_decayed GetRKey() const { return rkey_; }
 
-    std::unordered_map<right_key_type, right_type> right_map;
-    for (const auto& item : rflow_) {
-      auto key = rkey_(item);
-
-      if constexpr (is_kv_v<raw_right_type>) {
-        right_map.emplace(key, item.value);
-      } else {
-        right_map.emplace(key, item);
-      }
-    }
-
-    std::vector<JoinResult<left_type, right_type>> ans;
-    for (const auto& item : range) {
-      auto key = lkey_(item);
-      auto it = right_map.find(key);
-
-      left_type base;
-      if constexpr(is_kv_v<raw_left_type>) {
-        base = item.value;
-      } else {
-        base = item;
-      }
-
-      if (it != right_map.end()) {
-        ans.push_back({base, it->second});
-      } else {
-        ans.push_back({base, std::nullopt});
-      }
-    }
-    return ans;
-  }
+  const RightFlow& GetRightFlow() const { return rflow_; }
 
  private:
   const RightFlow& rflow_;
-  LKey lkey_;
-  RKey rkey_;
+  lkey_decayed lkey_;
+  rkey_decayed rkey_;
 };
 
 template <typename RightFlow>
 auto Join(const RightFlow& rflow) {
   auto lkey = [](const auto& kv) { return kv.key; };
   auto rkey = lkey;
-  return JoinRange<RightFlow, decltype(lkey), decltype(rkey)>(rflow, lkey,
-                                                              rkey);
+  return JoinTemp<RightFlow, decltype(lkey), decltype(rkey)>(rflow, lkey, rkey);
 }
 
 template <typename RightFlow, typename LKey, typename RKey>
 auto Join(const RightFlow& rflow, const LKey& lkey, const RKey& rkey) {
-  return JoinRange<RightFlow, LKey, RKey>(rflow, lkey, rkey);
+  return JoinTemp<RightFlow, LKey, RKey>(rflow, lkey, rkey);
 }
+
+template <typename Range, typename LKey, typename RightMap, typename RightValue>
+class JoinIterator {
+ public:
+  using base_iterator = decltype(std::declval<const Range&>().begin());
+  using raw_left_type = std::decay_t<decltype(*std::declval<base_iterator>())>;
+  using left_type = kv_value_t<raw_left_type>;
+  using value_type = JoinResult<left_type, RightValue>;
+
+  JoinIterator(const base_iterator& begin, const base_iterator& end,
+               const RightMap& rightmap, const LKey& lkey)
+      : lkey_(lkey), map_(rightmap), current_(begin), end_(end) {}
+
+  bool operator==(const JoinIterator& other) const {
+    return current_ == other.current_;
+  }
+
+  bool operator!=(const JoinIterator& other) const { return !(*this == other); }
+
+  value_type operator*() const {
+    auto item = *current_;
+    auto key = lkey_(item);
+
+    left_type base;
+    if constexpr (is_kv_v<raw_left_type>) {
+      base = item.value;
+    } else {
+      base = item;
+    }
+
+    auto it = map_.find(key);
+    if (it != map_.end()) {
+      return value_type{base, it->second};
+    }
+    return value_type{base, std::nullopt};
+  }
+  
+
+  JoinIterator& operator++() {
+    ++current_;
+    return *this;
+  }
+
+  JoinIterator operator++(int) {
+    JoinIterator tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+ private:
+  LKey lkey_;
+  const RightMap& map_;
+  base_iterator current_;
+  base_iterator end_;
+};
+
+template <typename Range, typename RightFlow, typename LKey, typename RKey>
+class JoinRange {
+ public:
+  using raw_left_type = std::decay_t<decltype(*std::declval<Range>().begin())>;
+  using raw_right_type =
+      std::decay_t<decltype(*std::declval<RightFlow>().begin())>;
+
+  using left_type = kv_value_t<raw_left_type>;
+  using right_type = kv_value_t<raw_right_type>;
+
+  using right_key_type = std::decay_t<decltype(std::declval<RKey>()(
+      std::declval<raw_right_type>()))>;
+
+  using right_map_type = std::unordered_map<right_key_type, right_type>;
+  using iterator = JoinIterator<Range, LKey, right_map_type, right_type>;
+
+  // using raw_right_type = std::decay_t<decltype(*std::begin(rflow_))>;
+  // using raw_left_type = std::decay_t<decltype(*std::begin(range))>;
+
+  // Might be wrong
+  // using right_key_type =
+  //     decltype(std::declval<RKey>()((std::declval<raw_right_type>())));
+
+  JoinRange(const Range& range, const RightFlow& rflow, const LKey& lkey,
+            const RKey& rkey)
+      : range_(range), lkey_(lkey), rkey_(rkey) {
+    for (const auto& item : rflow) {
+      std::cout << item.first << " " << item.second << '\n';
+      auto key = rkey_(item);
+
+      std::cout << "insert key = " << key << "\n";
+
+      if constexpr (is_kv_v<raw_right_type>) {
+        right_map_.emplace(key, item.value);
+      } else {
+        right_map_.emplace(key, item);
+      }
+
+      if constexpr (is_kv_v<raw_right_type>) {
+        right_map_.emplace(key, item.value);
+      } else {
+        right_map_.emplace(key, item);
+      }
+    }
+  }
+
+  iterator begin() const {
+    return iterator(range_.begin(), range_.end(), right_map_, lkey_);
+  }
+
+  iterator end() const {
+    return iterator(range_.end(), range_.end(), right_map_, lkey_);
+  }
+
+ private:
+  const Range& range_;
+  std::unordered_map<right_key_type, right_type> right_map_;
+  LKey lkey_;
+  RKey rkey_;
+};
 
 template <typename Range, typename RightFlow, typename LKey, typename RKey>
 auto operator|(const Range& range,
-               const JoinRange<RightFlow, LKey, RKey>& join) {
-  return join(range);
+               const JoinTemp<RightFlow, LKey, RKey>& join) {
+  return JoinRange<Range, RightFlow, LKey, RKey>(
+      range, join.GetRightFlow(), join.GetLKey(), join.GetRKey());
 }

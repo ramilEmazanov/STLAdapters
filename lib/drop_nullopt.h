@@ -29,7 +29,6 @@ class DropNulloptIterator {
     return copy;
   }
 
-  // decltype(auto) operator*() { return **current_; }
   value_type operator*() { return **current_; }
 
   pointer operator->() { return &(**current_); }

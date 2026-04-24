@@ -12,7 +12,6 @@ class Transform {
   decayed_predicate predicate_;
 };
 
-// Begin, end + for range based loop
 template <typename Range, typename Predicate>
 class TransformIterator {
  public:
@@ -43,7 +42,6 @@ class TransformIterator {
     }
     return value_.value();
   }
-  // value_type operator*() { return predicate_(*current_); }
 
   pointer operator->() { return &(*current_); }
 

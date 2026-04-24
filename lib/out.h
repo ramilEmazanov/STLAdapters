@@ -17,8 +17,6 @@ class Out {
   std::ostream& out_;
 };
 
-// Do we need const Range& ?
-// const Out& ?
 template <typename Range>
 void operator|(const Range& range, const Out& out) {
   out(range);
