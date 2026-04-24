@@ -10,6 +10,6 @@
 #include <open_files.h>
 #include <out.h>
 #include <split.h>
+#include <split_expected.h>
 #include <transform.h>
 #include <write.h>
-#include <split_expected.h>
