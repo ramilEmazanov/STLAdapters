@@ -1,3 +1,5 @@
+#pragma once
+
 #include <fstream>
 #include <memory>
 
@@ -44,7 +46,7 @@ class OpenFilesRange {
   auto end() const { return OpenFilesIterator(range_.end(), range_.end()); }
 
  private:
-  const Range& range_;
+  Range range_;
 };
 
 template <typename Range>

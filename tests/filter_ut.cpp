@@ -1,6 +1,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <processing.h>
+#include <as_data_flow.h>
+#include <filter.h>
+#include <as_vector.h>
+#include <transform.h>
 
 #include <algorithm>
 #include <cctype>

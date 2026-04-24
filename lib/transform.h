@@ -1,3 +1,4 @@
+#pragma once
 
 template <typename Predicate>
 class Transform {
@@ -19,9 +20,7 @@ class TransformIterator {
   using original_type = decltype(*std::declval<Range>().begin());
   using value_type = std::invoke_result_t<Predicate, original_type>;
   using reference = value_type&;
-  using difference_type = std::ptrdiff_t;
   using pointer = value_type*;
-  using iterator_category = std::input_iterator_tag;
   using decayed_predicate = std::decay_t<Predicate>;
 
   TransformIterator(const Predicate& predicate, const base_iterator& begin,
@@ -42,8 +41,6 @@ class TransformIterator {
     }
     return value_.value();
   }
-
-  pointer operator->() { return &(*current_); }
 
   TransformIterator& operator++() {
     ++current_;
@@ -85,7 +82,7 @@ class TransformRange {
   decayed_predicate GetPredicate() const { return predicate_; }
 
  private:
-  const Range& source_;
+  Range source_;
   decayed_predicate predicate_;
 };
 

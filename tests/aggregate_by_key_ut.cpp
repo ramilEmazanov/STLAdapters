@@ -1,6 +1,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <processing.h>
+#include <aggregate_by_key.h>
+#include <as_data_flow.h>
+#include <as_vector.h>
+#include <transform.h>
+#include <filter.h>
 
 #include <cstddef>
 #include <cstdint>
@@ -163,6 +167,22 @@ TEST(AggregateByKeyTest, NonEmptyStartingValue) {
           [](const int& v, std::vector<int>& val) { val.push_back(v); },
           [](const int& v) { return v % 2; }) |
       AsVector();
+
+  ASSERT_THAT(result, ::testing::ElementsAre(
+                          std::make_pair(1, std::vector<int>{67, 1, 9, 25}),
+                          std::make_pair(0, std::vector<int>{67, 4, 16, 36})));
+}
+
+void Add(const int& v, std::vector<int>& val) { val.push_back(v); }
+
+bool GetKey(const int& v) { return v % 2; }
+
+TEST(AggregateByKeyTest, PassingFunction) {
+  std::vector<int> input = {1, 2, 3, 4, 5, 6, -1, -2, -3, -4};
+
+  auto result = AsDataFlow(input) | Filter([](int x) { return x > 0; }) |
+                Transform([](int x) { return x * x; }) |
+                AggregateByKey(std::vector<int>{67}, &Add, GetKey) | AsVector();
 
   ASSERT_THAT(result, ::testing::ElementsAre(
                           std::make_pair(1, std::vector<int>{67, 1, 9, 25}),

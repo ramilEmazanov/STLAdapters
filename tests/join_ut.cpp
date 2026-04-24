@@ -1,6 +1,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <processing.h>
+#include <as_data_flow.h>
+#include <join.h>
+#include <as_vector.h>
+#include <aggregate_by_key.h>
 
 #include <cstdint>
 #include <optional>

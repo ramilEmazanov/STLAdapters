@@ -1,3 +1,5 @@
+#pragma once
+
 #include <fstream>
 #include <iterator>
 
@@ -14,12 +16,11 @@ class Split {
 template <typename Range>
 class SplitIterator {
  public:
-  using base_iterator = decltype(std::declval<Range>().begin());
+  using base_iterator =
+      std::decay_t<decltype(std::declval<const Range>().begin())>;
   using value_type = std::string;
-  using reference = const value_type&;
-  using pointer = const value_type*;
-  using difference_type = std::ptrdiff_t;
-  using iterator_category = std::input_iterator_tag;
+  using reference = value_type&;
+  using pointer = value_type*;
 
   SplitIterator(const base_iterator& begin, const base_iterator& end,
                 const std::string& delimiter)
@@ -37,9 +38,7 @@ class SplitIterator {
     return !(*this == other);
   }
 
-  value_type operator*() const { return token_; }
-
-  pointer operator->() const { return &token_; }
+  value_type operator*() { return token_; }
 
   SplitIterator& operator++() {
     ReadToken();
@@ -91,7 +90,7 @@ class SplitRange {
   }
 
  private:
-  const Range& source_;
+  Range source_;
   std::string delimiter_;
 };
 

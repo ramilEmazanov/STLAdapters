@@ -1,6 +1,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <processing.h>
+#include <drop_nullopt.h>
+#include <as_vector.h>
+#include <as_data_flow.h>
+#include <filter.h>
+#include <transform.h>
 
 #include <optional>
 #include <vector>

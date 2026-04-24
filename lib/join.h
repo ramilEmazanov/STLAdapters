@@ -1,7 +1,7 @@
 #pragma once
 
-#include <optional>
 #include <iostream>
+#include <optional>
 #include <unordered_map>
 
 template <typename Key, typename Value>
@@ -91,7 +91,7 @@ auto Join(const RightFlow& rflow, const LKey& lkey, const RKey& rkey) {
 template <typename Range, typename LKey, typename RightMap, typename RightValue>
 class JoinIterator {
  public:
-  using base_iterator = decltype(std::declval<const Range&>().begin());
+  using base_iterator = decltype(std::declval<const Range>().begin());
   using raw_left_type = std::decay_t<decltype(*std::declval<base_iterator>())>;
   using left_type = kv_value_t<raw_left_type>;
   using value_type = JoinResult<left_type, RightValue>;
@@ -106,7 +106,7 @@ class JoinIterator {
 
   bool operator!=(const JoinIterator& other) const { return !(*this == other); }
 
-  value_type operator*() const {
+  value_type operator*() {
     auto item = *current_;
     auto key = lkey_(item);
 
@@ -123,7 +123,6 @@ class JoinIterator {
     }
     return value_type{base, std::nullopt};
   }
-  
 
   JoinIterator& operator++() {
     ++current_;
@@ -153,27 +152,17 @@ class JoinRange {
   using left_type = kv_value_t<raw_left_type>;
   using right_type = kv_value_t<raw_right_type>;
 
-  using right_key_type = std::decay_t<decltype(std::declval<RKey>()(
-      std::declval<raw_right_type>()))>;
+  using right_key_type =
+      std::decay_t<std::invoke_result_t<RKey, raw_right_type>>;
 
   using right_map_type = std::unordered_map<right_key_type, right_type>;
   using iterator = JoinIterator<Range, LKey, right_map_type, right_type>;
-
-  // using raw_right_type = std::decay_t<decltype(*std::begin(rflow_))>;
-  // using raw_left_type = std::decay_t<decltype(*std::begin(range))>;
-
-  // Might be wrong
-  // using right_key_type =
-  //     decltype(std::declval<RKey>()((std::declval<raw_right_type>())));
 
   JoinRange(const Range& range, const RightFlow& rflow, const LKey& lkey,
             const RKey& rkey)
       : range_(range), lkey_(lkey), rkey_(rkey) {
     for (const auto& item : rflow) {
-      std::cout << item.first << " " << item.second << '\n';
       auto key = rkey_(item);
-
-      std::cout << "insert key = " << key << "\n";
 
       if constexpr (is_kv_v<raw_right_type>) {
         right_map_.emplace(key, item.value);
@@ -198,7 +187,7 @@ class JoinRange {
   }
 
  private:
-  const Range& range_;
+  Range range_;
   std::unordered_map<right_key_type, right_type> right_map_;
   LKey lkey_;
   RKey rkey_;

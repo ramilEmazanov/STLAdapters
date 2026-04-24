@@ -1,3 +1,5 @@
+#pragma once
+
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -5,6 +7,9 @@
 template <typename Value, typename Aggregator, typename KeyMaker>
 class AggregateByKey {
  public:
+  using decayed_agg = std::decay_t<Aggregator>;
+  using decayed_keymaker = std::decay_t<KeyMaker>;
+
   AggregateByKey(const Value& start_value, const Aggregator& aggregator,
                  const KeyMaker& key_maker)
       : starting_value_(start_value),
@@ -48,8 +53,8 @@ class AggregateByKey {
 
  private:
   Value starting_value_;
-  Aggregator aggregator_;
-  KeyMaker key_maker_;
+  decayed_agg aggregator_;
+  decayed_keymaker key_maker_;
 };
 
 template <typename Range, typename Value, typename Aggregator,

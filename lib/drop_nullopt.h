@@ -1,3 +1,4 @@
+#pragma once
 #include <optional>
 
 class DropNullopt {};
@@ -5,21 +6,20 @@ class DropNullopt {};
 template <typename Range>
 class DropNulloptIterator {
  public:
-  using base_iterator = decltype(std::declval<Range>().begin());
-  using opt_type =
-      std::remove_reference_t<decltype(*std::declval<Range>().begin())>;
-  using value_type = typename opt_type::value_type;
+  using base_iterator = decltype(std::declval<const Range>().begin());
+  using optional_type = std::decay_t<decltype(*std::declval<Range>().begin())>;
+  using value_type = typename optional_type::value_type;
   using reference = value_type&;
   using pointer = value_type*;
 
   DropNulloptIterator(const base_iterator& begin, const base_iterator& end)
       : current_(begin), end_(end) {
-    advance();
+    FindNext();
   }
 
   DropNulloptIterator& operator++() {
     ++current_;
-    advance();
+    FindNext();
     return *this;
   }
 
@@ -31,8 +31,6 @@ class DropNulloptIterator {
 
   value_type operator*() { return **current_; }
 
-  pointer operator->() { return &(**current_); }
-
   bool operator==(const DropNulloptIterator& other) const {
     return current_ == other.current_;
   }
@@ -42,7 +40,7 @@ class DropNulloptIterator {
   }
 
  private:
-  void advance() {
+  void FindNext() {
     while (current_ != end_ && *current_ == std::nullopt) {
       current_++;
     }
@@ -66,7 +64,7 @@ class DropNulloptRange {
   }
 
  private:
-  const Range& source_;
+  Range source_;
 };
 
 template <typename Range>

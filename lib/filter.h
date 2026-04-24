@@ -16,19 +16,16 @@ class Filter {
 template <typename Range, typename Predicate>
 class FilterIterator {
  public:
-  using base_iterator = decltype(std::declval<const Range&>().begin());
-  using value_type =
-      std::remove_reference_t<decltype(*std::declval<Range>().begin())>;
+  using base_iterator = decltype(std::declval<const Range>().begin());
+  using value_type = std::decay_t<decltype(*std::declval<Range>().begin())>;
   using reference = value_type&;
-  using difference_type = std::ptrdiff_t;
   using pointer = value_type*;
-  using iterator_category = std::input_iterator_tag;
   using decayed_predicate = std::decay_t<Predicate>;
 
   FilterIterator(const Predicate& predicate, const base_iterator& begin,
                  const base_iterator& end)
       : predicate_(predicate), current_(begin), end_(end) {
-    advance();
+    FindNext();
   }
 
   bool operator==(const FilterIterator& other) const {
@@ -41,11 +38,9 @@ class FilterIterator {
 
   value_type operator*() { return *current_; }
 
-  pointer operator->() { return &(*current_); }
-
   FilterIterator& operator++() {
     ++current_;
-    advance();
+    FindNext();
     return *this;
   }
 
@@ -56,7 +51,7 @@ class FilterIterator {
   }
 
  private:
-  void advance() {
+  void FindNext() {
     while (current_ != end_ && !predicate_(*current_)) {
       ++current_;
     }
@@ -86,7 +81,7 @@ class FilterRange {
   Predicate GetPredicate() const { return predicate_; }
 
  private:
-  const Range& source_;
+  Range source_;
   Predicate predicate_;
 };
 

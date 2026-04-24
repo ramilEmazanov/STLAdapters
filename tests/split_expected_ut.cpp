@@ -1,6 +1,12 @@
+#include <as_data_flow.h>
+#include <as_vector.h>
+#include <filter.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <processing.h>
+#include <split.h>
+#include <split_expected.h>
+#include <transform.h>
+#include <write.h>
 
 #include <charconv>
 #include <expected>
@@ -183,8 +189,8 @@ TEST(SplitExpectedTest, WorkWithSplitFlows) {
   ASSERT_THAT(names | AsVector(),
               testing::ElementsAre("Roma", "Kekich", "Lolkek"));
 
-  auto short_words = wrong |
-               Filter([](const std::string& s) { return s.size() <= 3; }) |
-               AsVector();
+  auto short_words =
+      wrong | Filter([](const std::string& s) { return s.size() <= 3; }) |
+      AsVector();
   ASSERT_THAT(short_words, testing::ElementsAre("123", "of"));
 }

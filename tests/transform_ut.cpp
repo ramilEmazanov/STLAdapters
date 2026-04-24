@@ -1,6 +1,9 @@
+#include <as_data_flow.h>
+#include <as_vector.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <processing.h>
+#include <transform.h>
+#include <filter.h>
 
 #include <sstream>
 #include <string>
@@ -23,7 +26,6 @@ TEST(TransformTest, PowerOfTwo) {
   ASSERT_THAT(result, testing::ElementsAre(1, 4, 9, 16, 25));
 }
 
-// My
 TEST(TransformTest, NoMutatingInitialVector) {
   std::vector<int> input = {1, 2, 3, 4, 5};
   auto result =
