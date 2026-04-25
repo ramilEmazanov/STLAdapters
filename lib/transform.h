@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 template <typename Predicate>
 class Transform {
  public:
