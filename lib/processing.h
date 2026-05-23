@@ -13,3 +13,4 @@
 #include <split_expected.h>
 #include <transform.h>
 #include <write.h>
+#include <merge.h>
