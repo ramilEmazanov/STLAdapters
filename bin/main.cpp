@@ -1,35 +1,43 @@
-#include <iostream>
+#include <aggregate_by_key.h>
+#include <as_data_flow.h>
+#include <as_vector.h>
+#include <dir.h>
+#include <filter.h>
+#include <merge.h>
+#include <open_files.h>
+#include <out.h>
+#include <split.h>
+#include <string.h>
+#include <transform.h>
 
-#include <processing.h>
+#include <algorithm>
+#include <cctype>
+#include <filesystem>
+#include <format>
+#include <iostream>
+#include <utility>
 
 /*
-Программа считает частоту слов, встречающихся во всех файлах в директории 
+Программа считает частоту слов, встречающихся во всех файлах в директории
 и выводит итоговую статистику в консоль
 */
 
-int main(int argc, char **argv) {
-  if(agrc != 2)
-    return 1;
-  
+int main(int argc, char** argv) {
 
-  bool recursive = false;
-  Dir(argv[1], recursive) 
-    | Filter([](std::filesystem::path& p){ return p.extension() == ".txt"; })
-    | OpenFiles()
-    | Split("\n ,.;")
-    | Transform(
-        [](std::string& token) { 
-            std::transform(token.begin(), token.end(), token.begin(), [](char c){return std::tolower(c);});
-            return token;
-        })
-    | AggregateByKey(
-        0uz, 
-        [](const std::string&, size_t& count) { ++count;},
-        [](const std::string& token) { return token;}
-      )
-    | Transform([](const std::pair<std::string, size_t>& stat) { return std::format("{} - {}", stat.first, stat.second);})
-    | Out(std::cout);
+  std::vector<int> nums = {1, 2, 1, 1, 0};
+  std::vector<int> right = {1, 3, 4, 5, 6, 0};
 
-  
-  return 0;
+  // std::vector<int> nums = {1, 2};
+  // std::vector<int> right = {1, 3, 4, 5, 6, 0};
+
+  // std::vector<int> nums = {1, 3, 4, 5, 6};
+  // std::vector<int> right = {1, 2};
+
+  auto flow2 = AsDataFlow(nums) | Merge(right) | AsVector();
+
+  std::cout << "straight : ";
+  for (const auto& item : flow2) {
+    std::cout << item;
+  }
+
 }
